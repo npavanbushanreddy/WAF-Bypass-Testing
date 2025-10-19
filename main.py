@@ -195,7 +195,7 @@ def user_setup():
     if use_proxy == "yes":
         proxy_host = input("Proxy Host [127.0.0.1]: ").strip() or "127.0.0.1"
         proxy_port = input("Proxy Port [8080]: ").strip() or "8080"
-         proxies = {"http": f"http://{proxy_host}:{proxy_port}", "https": f"http://{proxy_host}:{proxy_port}"}
+        proxies = {"http": f"http://{proxy_host}:{proxy_port}", "https": f"http://{proxy_host}:{proxy_port}"}
         print(f"✅ Proxy enabled ({proxy_host}:{proxy_port})")
     else:
         proxies = None
