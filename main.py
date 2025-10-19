@@ -50,7 +50,15 @@ def parse_http_request(raw_request: str):
 
     headers, body_lines = {}, []
     header_ended = False
-    start_index = lines.index(request_line) + 1 if request_line in lines else 1
+    start_index = 0
+
+    for idx, l in enumerate(lines):
+
+        if l.strip() == request_line:
+
+            start_index = idx + 1
+
+            break
 
     for line in lines[start_index:]:
         stripped = line.strip()
@@ -66,10 +74,10 @@ def parse_http_request(raw_request: str):
         else:
             body_lines.append(line.rstrip("\\r"))
 
-    body = "\\n".join(body_lines).strip()
+    body = "\n".join(body_lines).strip()
     complete_request = (
-        f"{method} {path} {protocol}\\n"
-        + "\\n".join(f"{k}: {v}" for k, v in headers.items())
+        f"{method} {path} {protocol}\n"
+        + "\n".join(f"{k}: {v}" for k, v in headers.items())
         + ("\n\n" + body if body else "")
     )
     return method, path, headers, body, complete_request
@@ -95,7 +103,7 @@ def build_schedule(total_requests: int, requests_per_minute: int) -> list:
 
     return schedule
 
-def send_request(raw_request, index, session, results, start_time, total_requests):
+def send_request(raw_request, index, session, results, start_time, total_requests, dry_run=False):
     """Send a single request and print status, timing, and ETA summary."""
     try:
         method, path, headers, body, full_req = parse_http_request(raw_request)
@@ -104,11 +112,33 @@ def send_request(raw_request, index, session, results, start_time, total_request
         if urlparse(full_url).hostname != TARGET_DOMAIN:
             return index, None, "Invalid host in request", full_req
 
-        req_start = time.time()
-        response = session.request(
-            method=method, url=full_url, headers=headers, data=body or None, timeout=REQUEST_TIMEOUT
-        )
-        elapsed = time.time() - req_start
+        if dry_run:
+
+            # simulate a small network delay and a 200 response
+
+            req_start = time.time()
+
+            time.sleep(random.uniform(0.03, 0.15))
+
+            elapsed = time.time() - req_start
+
+            status_code = 200
+
+            response_status = status_code
+
+        else:
+
+            req_start = time.time()
+
+            response = session.request(
+
+                method=method, url=full_url, headers=headers, data=body or None, timeout=REQUEST_TIMEOUT
+
+            )
+
+            elapsed = time.time() - req_start
+
+            response_status = response.status_code
 
         with threading.Lock():
             results.append(elapsed)
@@ -124,21 +154,21 @@ def send_request(raw_request, index, session, results, start_time, total_request
             mins, secs = divmod(int(remaining), 60)
             rem_str = f"{mins}m {secs}s" if mins else f"{secs}s"
 
-            print(f"\\n📊 Request #{index+1}")
+            print(f"\n📊 Request #{index+1}")
             print(f"  ➜ Sent At       : {datetime.now().strftime('%H:%M:%S')}")
             print(f"  ➜ ETA (Finish)  : {eta.strftime('%H:%M:%S')}  (~{rem_str} left)")
             print(f"  ➜ Method        : {method}")
             print(f"  ➜ URL           : {full_url}")
-            print(f"  ➜ Status        : {response.status_code}")
+            print(f"  ➜ Status        : {response_status}")
             print(f"  ➜ Time Taken    : {elapsed:.2f}s | Avg: {avg_time:.2f}s")
-            print(f"  ➜ Progress      : {done}/{total_requests} ({percent:.1f}%)\\n")
+            print(f"  ➜ Progress      : {done}/{total_requests} ({percent:.1f}%)\n")
 
-        return index, response.status_code, None, full_req
+        return index, response_status, None, full_req
 
     except Exception as e:
         return index, None, f"Error: {e}", raw_request
 
-def send_request_at(raw_request, index, session, results, scheduled_time, start_time, total_requests):
+def send_request_at(raw_request, index, session, results, scheduled_time, start_time, total_requests, dry_run=False):
     """Send the request according to its scheduled time."""
     try:
         if scheduled_time:
@@ -148,13 +178,13 @@ def send_request_at(raw_request, index, session, results, scheduled_time, start_
                 end = time.time() + delay
                 while time.time() < end:
                     time.sleep(min(0.5, end - time.time()))
-        return send_request(raw_request, index, session, results, start_time, total_requests)
+        return send_request(raw_request, index, session, results, start_time, total_requests, dry_run=dry_run)
     except Exception as e:
         return index, None, f"Error in scheduled send: {e}", None
 
 def user_setup():
     """Prompt for target, proxy, and rate-limit configuration."""
-    print("\\n🛠  Configuration Setup\\n")
+    print("\n🛠  Configuration Setup\n")
     global TARGET_DOMAIN
     TARGET_DOMAIN = input("Enter target website (domain only, e.g., demo.testfire.net): ").strip()
     if not TARGET_DOMAIN:
@@ -165,7 +195,7 @@ def user_setup():
     if use_proxy == "yes":
         proxy_host = input("Proxy Host [127.0.0.1]: ").strip() or "127.0.0.1"
         proxy_port = input("Proxy Port [8080]: ").strip() or "8080"
-        proxies = {"http": f"http://{proxy_host}:{proxy_port}"}
+         proxies = {"http": f"http://{proxy_host}:{proxy_port}", "https": f"http://{proxy_host}:{proxy_port}"}
         print(f"✅ Proxy enabled ({proxy_host}:{proxy_port})")
     else:
         proxies = None
@@ -185,11 +215,11 @@ def user_setup():
         rpm = None
         print("🚫 Rate limiting disabled")
 
-    print("\\n--------------------------------------")
+    print("\n--------------------------------------")
     print(f"Target Domain : {TARGET_DOMAIN}")
     print(f"Proxy Enabled : {'Yes' if proxies else 'No'}")
     print(f"Rate Limiting : {'Yes' if rpm else 'No'}")
-    print("--------------------------------------\\n")
+    print("--------------------------------------\n")
 
     return proxies, rpm
 
@@ -218,8 +248,9 @@ def main():
 
     session = requests.Session()
     if proxies:
-        session.proxies = proxies
-    session.timeout = REQUEST_TIMEOUT
+        session.proxies.update(proxies)
+
+    # note: timeout is passed per-request; session.timeout is not standard
 
     results = []
     total = len(df.index)
@@ -228,11 +259,11 @@ def main():
     schedule = build_schedule(total, rpm) if rpm else None
     if schedule:
         preview = [datetime.fromtimestamp(t).strftime("%H:%M:%S") for t in schedule[:min(5, len(schedule))]]
-        print(f"🔀 Schedule generated (first {len(preview)}): {preview}\\n")
+        print(f"🔀 Schedule generated (first {len(preview)}): {preview}\n")
     else:
-        print("⚠ No scheduling — sending immediately.\\n")
+        print("⚠ No scheduling — sending immediately.\n")
 
-    print(f"🚀 Starting replay to {TARGET_DOMAIN}...\\n")
+    print(f"🚀 Starting replay to {TARGET_DOMAIN}...\n")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {
@@ -252,7 +283,7 @@ def main():
                 pbar.update(1)
 
     df.to_excel(OUTPUT_FILE, index=False)
-    print(f"\\n✅ Completed! Results saved to '{OUTPUT_FILE}'")
+    print(f"\n✅ Completed! Results saved to '{OUTPUT_FILE}'")
     if results:
         print(f"📊 Average response time: {sum(results)/len(results):.2f}s")
 
