@@ -96,3 +96,93 @@ requests
 tqdm
 openpyxl
 ```
+#### References :
+
+###### Cross-site Scripting (XSS)
+
+* 👉 https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)
+
+###### XSS (Cross Site Scripting) Prevention Cheat Sheet
+
+* 👉 https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet
+
+###### DOM based XSS Prevention Cheat Sheet
+
+* 👉 https://www.owasp.org/index.php/DOM_based_XSS_Prevention_Cheat_Sheet
+
+###### Testing for Reflected Cross site scripting (OTG-INPVAL-001)
+
+* 👉 https://www.owasp.org/index.php/Testing_for_Reflected_Cross_site_scripting_(OTG-INPVAL-001)
+
+###### Testing for Stored Cross site scripting (OTG-INPVAL-002)
+
+* 👉 https://www.owasp.org/index.php/Testing_for_Stored_Cross_site_scripting_(OTG-INPVAL-002)
+
+###### Testing for DOM-based Cross site scripting (OTG-CLIENT-001)
+
+* 👉 https://www.owasp.org/index.php/Testing_for_DOM-based_Cross_site_scripting_(OTG-CLIENT-001)
+
+###### DOM Based XSS
+
+* 👉 https://www.owasp.org/index.php/DOM_Based_XSS
+
+###### Cross-Site Scripting (XSS) Cheat Sheet | Veracode
+
+* 👉 https://www.veracode.com/security/xss
+
+#### Recommended books :
+
+* [XSS Attacks: Cross-site Scripting Exploits and Defense](https://books.google.com.tr/books/about/XSS_Attacks.html?id=dPhqDe0WHZ8C)
+
+* [XSS Cheat Sheet](https://leanpub.com/xss)
+
+
+### Cloning an Existing Repository ( Clone with HTTPS )
+```
+root@ismailtasdelen:~# git clone https://github.com/ismailtasdelen/xss-payload-list.git
+```
+
+### Cloning an Existing Repository ( Clone with SSH )
+```
+root@ismailtasdelen:~# git clone git@github.com:ismailtasdelen/xss-payload-list.git
+```
+
+### Published Website :
+
+##### Kitploit - https://www.kitploit.com/2018/05/xss-payload-list-cross-site-scripting.html
+
+* SQL Injection ( OWASP )
+
+👉 https://www.owasp.org/index.php/SQL_Injection
+
+* Blind SQL Injection
+
+👉 https://www.owasp.org/index.php/Blind_SQL_Injection
+
+* Testing for SQL Injection (OTG-INPVAL-005)
+
+👉 https://www.owasp.org/index.php/Testing_for_SQL_Injection_(OTG-INPVAL-005)
+
+* SQL Injection Bypassing WAF
+
+👉 https://www.owasp.org/index.php/SQL_Injection_Bypassing_WAF
+
+* Reviewing Code for SQL Injection
+
+👉 https://www.owasp.org/index.php/Reviewing_Code_for_SQL_Injection
+
+* PL/SQL:SQL Injection
+
+👉 https://www.owasp.org/index.php/PL/SQL:SQL_Injection
+
+* Testing for NoSQL injection
+
+👉 https://www.owasp.org/index.php/Testing_for_NoSQL_injection
+
+* SQL Injection Injection Prevention Cheat Sheet 
+
+👉 https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html
+
+* SQL Injection Query Parameterization Cheat Sheet 
+
+👉 https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html
